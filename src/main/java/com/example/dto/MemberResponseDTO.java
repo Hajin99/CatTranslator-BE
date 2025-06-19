@@ -5,14 +5,26 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-public class MemberResponseDto {
+import java.time.LocalDateTime;
+
+public class MemberResponseDTO {
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class JoinResultDTO{
+        int memberId;
+        LocalDateTime createdAt;
+    }
 
     @Builder
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     public static class LoginResultDTO {
-        Long memberId;
+        int memberId;
+        String nickname;
         String accessToken;
     }
 
