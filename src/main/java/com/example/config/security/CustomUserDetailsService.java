@@ -1,6 +1,6 @@
 package com.example.config.security;
 
-import com.example.Repository.MemberRepository;
+import com.example.repository.MemberRepository;
 import com.example.domain.entity.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;

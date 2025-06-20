@@ -1,6 +1,6 @@
 package com.example.service;
 
-import com.example.Repository.MemberRepository;
+import com.example.repository.MemberRepository;
 import com.example.apiPayload.code.status.ErrorStatus;
 import com.example.apiPayload.exception.handler.MemberHandler;
 import com.example.config.security.jwt.JwtTokenProvider;
