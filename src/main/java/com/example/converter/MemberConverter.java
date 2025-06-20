@@ -33,4 +33,11 @@ public class MemberConverter {
                 .build();
     }
 
+    public static MemberResponseDTO.MemberInfoDTO toMemberInfoDTO(Member member){
+        return MemberResponseDTO.MemberInfoDTO.builder()
+                .nickname(member.getNickname())
+                .email(member.getEmail())
+                .build();
+    }
+
 }

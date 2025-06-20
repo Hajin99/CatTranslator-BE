@@ -28,4 +28,13 @@ public class MemberResponseDTO {
         String accessToken;
     }
 
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MemberInfoDTO{
+        String nickname;
+        String email;
+    }
+
 }

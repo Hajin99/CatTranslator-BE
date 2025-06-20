@@ -10,12 +10,13 @@ import com.example.dto.MemberRequestDTO;
 import com.example.dto.MemberResponseDTO;
 import com.example.service.MemberService;
 //import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import static com.example.apiPayload.code.status.SuccessStatus.LOGIN_SUCCESS;
 
 @RestController
 @RequestMapping("/users")
@@ -51,6 +52,11 @@ public class MemberController {
     @PostMapping("/login")
     //@Operation(summary = "유저 로그인 API", description = "유저가 로그인하는 API입니다.")
     public ApiResponse<MemberResponseDTO.LoginResultDTO> login(@RequestBody @Valid MemberRequestDTO.LoginRequestDTO request) {
-        return ApiResponse.onSuccess(memberService.loginUser(request));
+        return ApiResponse.of(LOGIN_SUCCESS, memberService.loginUser(request));
+    }
+
+    @GetMapping("/info")
+    public ApiResponse<MemberResponseDTO.MemberInfoDTO> getMyInfo(HttpServletRequest request) {
+        return ApiResponse.onSuccess(memberService.getMemberInfo(request));
     }
 }
