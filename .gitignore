@@ -40,4 +40,4 @@ out/
 src/main/resources/application.yml
 
 # python 가상 환경 무시
-venv/
+python/venv/
