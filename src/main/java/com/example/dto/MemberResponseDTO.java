@@ -35,6 +35,7 @@ public class MemberResponseDTO {
     public static class MemberInfoDTO{
         String nickname;
         String email;
+        LocalDateTime joinedAt;
     }
 
 }

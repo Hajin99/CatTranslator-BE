@@ -37,6 +37,7 @@ public class MemberConverter {
         return MemberResponseDTO.MemberInfoDTO.builder()
                 .nickname(member.getNickname())
                 .email(member.getEmail())
+                .joinedAt(member.getCreatedAt())
                 .build();
     }
 
