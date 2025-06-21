@@ -18,17 +18,17 @@ def analyze():
     data = request.get_data()
     with open("temp.wav", "wb") as f:
         f.write(data)
-    print("📦 temp.wav 크기:", os.path.getsize("temp.wav"))
+    print("temp.wav 크기:", os.path.getsize("temp.wav"))
 
     # 디버깅용
     sf_data, sf_sr = sf.read("temp.wav")
-    print("🔊 sf_data:", sf_data.shape, sf_sr)
-    print("🔊 샘플 일부:", sf_data[:10])
+    print("sf_data:", sf_data.shape, sf_sr)
+    print("샘플 일부:", sf_data[:10])
 
     # 2. 주파수 분석
     y, sr = librosa.load("temp.wav", sr=None)
     pitches, magnitudes = librosa.piptrack(y=y, sr=sr)
-    print("🔊 y sample:", y[:10])
+    print("y sample:", y[:10])
 
     # 3. 그래프 생성
     fig, ax = plt.subplots(figsize=(15, 6))
