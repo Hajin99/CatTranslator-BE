@@ -1,5 +1,5 @@
 import matplotlib
-from flask import Flask, request, send_file
+from flask import Flask, request, send_file, jsonify
 import librosa
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -68,6 +68,8 @@ def analyze():
 # json 형태로 분석 결과 반환
 @app.route('/emotion', methods=['POST'])
 def emotion():
+    print("Flask /emotion 엔드포인트 호출됨")
+    print(f"Request files: {request.files}") # 💡 추가: Flask가 받은 파일 파트
     # 1. 파일 저장
     data = request.get_data()
     with open("temp.wav", "wb") as f:
@@ -93,7 +95,7 @@ def emotion():
         "sample_count": len(pitch_track)
     }
 
-    return result
+    return jsonify(result)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5050)
