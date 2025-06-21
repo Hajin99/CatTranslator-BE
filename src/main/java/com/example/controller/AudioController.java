@@ -1,5 +1,7 @@
 package com.example.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,10 +19,15 @@ import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor
 public class AudioController {
+
+    private final ObjectMapper objectMapper;
 
     // 응답을 바이너리 이미지(PNG)로 받아 iOS에 전달
     @PostMapping("/audio")
@@ -32,7 +39,7 @@ public class AudioController {
             file.transferTo(tempPath); // 💡 이게 더 안정적
 
             byte[] savedData = Files.readAllBytes(tempPath);
-            System.out.println("📦 저장된 데이터 바이트 수: " + savedData.length);
+            System.out.println("저장된 데이터 바이트 수: " + savedData.length);
             byte[] receivedBytes = file.getBytes(); // MultipartFile의 바이트를 직접 가져옴
 
             Path testBytesPath = Files.createTempFile("test_received_bytes-", ".wav");
@@ -42,11 +49,11 @@ public class AudioController {
             // 이 testBytesPath 파일을 Mac으로 가져가서 재생해 보세요.
             // 만약 이 파일도 재생이 안된다면, 파일 전송 과정에서부터 데이터 손상이 발생한 것입니다.
 
-            System.out.println("📥 받은 파일 이름: " + file.getOriginalFilename());
-            System.out.println("📏 파일 크기: " + file.getSize()); // 바이트 크기 확인
+            System.out.println("받은 파일 이름: " + file.getOriginalFilename());
+            System.out.println("파일 크기: " + file.getSize()); // 바이트 크기 확인
 
-            System.out.println("📥 저장된 파일 경로: " + tempPath);
-            System.out.println("📏 저장된 파일 크기: " + Files.size(tempPath));
+            System.out.println("저장된 파일 경로: " + tempPath);
+            System.out.println("저장된 파일 크기: " + Files.size(tempPath));
 
 
             // Flask로 바이너리 전송
@@ -55,6 +62,7 @@ public class AudioController {
                     .header("Content-Type", "application/octet-stream")
                     .POST(HttpRequest.BodyPublishers.ofFile(tempPath))
                     .build();
+
 
             HttpClient client = HttpClient.newHttpClient();
             HttpResponse<byte[]> response = client.send(request, HttpResponse.BodyHandlers.ofByteArray());
@@ -69,15 +77,16 @@ public class AudioController {
         }
     }
 
+
 //    @PostMapping("/audio")
 //    public ResponseEntity<String> uploadAudio(@RequestParam("file") MultipartFile file) {
-//        System.out.println("📥 파일 업로드 도착");
+//        System.out.println("파일 업로드 도착");
 //        try {
 //            // 임시 저장
 //            Path tempPath = Files.createTempFile("uploaded-", ".wav");
 //            Files.write(tempPath, file.getBytes());
 //
-//            // 🧠 Python으로 전달하거나 Java에서 분석
+//            // Python으로 전달하거나 Java에서 분석
 //            String result = analyzeFrequency(tempPath.toFile());
 //
 //            return ResponseEntity.ok("분석 결과: " + result);
@@ -104,5 +113,80 @@ public class AudioController {
 //            return "분석 실패: " + e.getMessage();
 //        }
 //    }
+
+    // 응답을 json으로 받아 jpt 응답 생성 후 ios에 전달
+    @PostMapping("/audio/emotion")
+    public ResponseEntity<String> uploadAudio2(@RequestParam("file") MultipartFile file) {
+        try {
+            Path tempPath = Paths.get("/Users/gimhajin/Desktop/springSaved.wav");
+            //Path tempPath = Files.createTempFile("uploaded-", ".wav");
+            //iles.write(tempPath, file.getBytes());
+            file.transferTo(tempPath); // 💡 이게 더 안정적
+
+            byte[] savedData = Files.readAllBytes(tempPath);
+            System.out.println("📦 저장된 데이터 바이트 수: " + savedData.length);
+            byte[] receivedBytes = file.getBytes(); // MultipartFile의 바이트를 직접 가져옴
+
+            Path testBytesPath = Files.createTempFile("test_received_bytes-", ".wav");
+            Files.write(testBytesPath, receivedBytes);
+            System.out.println("DEBUG: 직접 바이트 배열로 저장된 파일 경로: " + testBytesPath);
+            System.out.println("DEBUG: 직접 바이트 배열로 저장된 파일 크기: " + Files.size(testBytesPath));
+            // 이 testBytesPath 파일을 Mac으로 가져가서 재생해 보세요.
+            // 만약 이 파일도 재생이 안된다면, 파일 전송 과정에서부터 데이터 손상이 발생한 것입니다.
+
+            System.out.println("받은 파일 이름: " + file.getOriginalFilename());
+            System.out.println("파일 크기: " + file.getSize()); // 바이트 크기 확인
+
+            System.out.println("저장된 파일 경로: " + tempPath);
+            System.out.println("저장된 파일 크기: " + Files.size(tempPath));
+
+            // Flask로 JSON 분석 요청 (별도 라우트)
+            HttpRequest jsonRequest = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:5050/emotion"))
+                    .header("Content-Type", "application/octet-stream")
+                    .POST(HttpRequest.BodyPublishers.ofFile(tempPath))
+                    .build();
+
+            HttpClient client = HttpClient.newHttpClient();
+            HttpResponse<String> response = client.send(jsonRequest, HttpResponse.BodyHandlers.ofString());
+            String analysisJson = response.body();
+
+            // GPT 프롬프트 구성
+            String prompt = """
+                다음은 고양이 울음 분석 결과입니다:
+                
+                %s
+
+                이 울음은 어떤 감정(예: 불안, 배고픔, 애정 표현 등)을 나타내고 있나요?
+            """.formatted(analysisJson);
+
+            String gptRequestBody = objectMapper.writeValueAsString(Map.of(
+                    "model", "gpt-4o",
+                    "messages", List.of(
+                            Map.of("role", "system", "content", "너는 고양이 울음 분석 전문가야."),
+                            Map.of("role", "user", "content", prompt)
+                    )
+            ));
+
+            // GPT API 요청
+            HttpRequest gptRequest = HttpRequest.newBuilder()
+                    .uri(URI.create("https://api.openai.com/v1/chat/completions"))
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer YOUR_OPENAI_API_KEY")
+                    .POST(HttpRequest.BodyPublishers.ofString(gptRequestBody))
+                    .build();
+
+            HttpResponse<String> gptResponse = client.send(gptRequest, HttpResponse.BodyHandlers.ofString());
+            String gptAnswer = gptResponse.body();
+
+            return ResponseEntity
+                    .ok()
+                    .header("Content-Type", "application/json")
+                    .body(gptAnswer);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(null);
+        }
+    }
 
 }

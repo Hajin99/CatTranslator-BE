@@ -11,6 +11,7 @@ import soundfile as sf
 
 app = Flask(__name__)
 
+# 이미지 형태로 분석 결과 반환
 @app.route('/analyze', methods=['POST'])
 def analyze():
     # 1. 파일 저장
@@ -63,6 +64,36 @@ def analyze():
 
     return send_file(img_io, mimetype='image/png')
 
+
+# json 형태로 분석 결과 반환
+@app.route('/emotion', methods=['POST'])
+def emotion():
+    # 1. 파일 저장
+    data = request.get_data()
+    with open("temp.wav", "wb") as f:
+        f.write(data)
+
+    # 2. 주파수 분석
+    y, sr = librosa.load("temp.wav", sr=None)
+    pitches, magnitudes = librosa.piptrack(y=y, sr=sr)
+
+    # 3. 피치 값 추출 (간단한 분석용)
+    pitch_track = []
+    for t in range(pitches.shape[1]):
+        index = magnitudes[:, t].argmax()
+        pitch = pitches[index, t]
+        pitch_track.append(pitch)
+    pitch_track = [float(p) for p in pitch_track if p > 0.0]
+
+    # 4. JSON 형태로 응답
+    result = {
+        "pitch_mean": np.mean(pitch_track),
+        "pitch_max": np.max(pitch_track),
+        "pitch_min": np.min(pitch_track),
+        "sample_count": len(pitch_track)
+    }
+
+    return result
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5050)
