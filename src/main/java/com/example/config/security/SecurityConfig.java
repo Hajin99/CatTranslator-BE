@@ -31,7 +31,7 @@ public class SecurityConfig {
                                 "/users/join",
                                 "/css/**"
                         ).permitAll()
-                        .requestMatchers("/users/info").authenticated()
+                        .requestMatchers("/users/info", "/api/audio").authenticated()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
