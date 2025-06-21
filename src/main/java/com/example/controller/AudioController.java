@@ -36,7 +36,7 @@ public class AudioController {
             Path tempPath = Paths.get("/Users/gimhajin/Desktop/springSaved.wav");
             //Path tempPath = Files.createTempFile("uploaded-", ".wav");
             //iles.write(tempPath, file.getBytes());
-            file.transferTo(tempPath); // 💡 이게 더 안정적
+            file.transferTo(tempPath); // ⭐️이게 더 안정적
 
             byte[] savedData = Files.readAllBytes(tempPath);
             System.out.println("저장된 데이터 바이트 수: " + savedData.length);
@@ -124,7 +124,7 @@ public class AudioController {
             file.transferTo(tempPath); // 💡 이게 더 안정적
 
             byte[] savedData = Files.readAllBytes(tempPath);
-            System.out.println("📦 저장된 데이터 바이트 수: " + savedData.length);
+            System.out.println("저장된 데이터 바이트 수: " + savedData.length);
             byte[] receivedBytes = file.getBytes(); // MultipartFile의 바이트를 직접 가져옴
 
             Path testBytesPath = Files.createTempFile("test_received_bytes-", ".wav");
