@@ -1,21 +1,24 @@
 package com.example.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.http.HttpStatus;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -28,6 +31,16 @@ import java.util.Map;
 public class AudioController {
 
     private final ObjectMapper objectMapper;
+    private String rawPrompt;
+
+    @PostConstruct
+    public void init() {
+        try {
+            rawPrompt = loadPrompt("prompt.txt");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     // 응답을 바이너리 이미지(PNG)로 받아 iOS에 전달
     @PostMapping("/audio")
@@ -114,6 +127,15 @@ public class AudioController {
 //        }
 //    }
 
+    // prompt.txt 읽기
+    private String loadPrompt(String templateName) throws IOException {
+        Resource resource = new ClassPathResource(templateName);
+        try(InputStream is = resource.getInputStream()){
+            return new String(is.readAllBytes(), StandardCharsets.UTF_8);
+        }
+    }
+
+
     // 응답을 json으로 받아 jpt 응답 생성 후 ios에 전달
     @PostMapping("/audio/emotion")
     public ResponseEntity<String> uploadAudio2(@RequestParam("file") MultipartFile file) {
@@ -152,25 +174,7 @@ public class AudioController {
             String analysisJson = response.body();
 
             // GPT 프롬프트 구성
-            String prompt = """
-                다음은 고양이 울음 분석 결과입니다:
-                
-                %s
-
-                이 울음은 어떤 감정(예: 불안, 배고픔, 애정 표현 등)을 나타내고 있나요?
-                이 뒤에 올 형식에 맞춰서 대답해줘.
-                pitch_max : 714.71Hz -> 높은 음역대의 울음은 고양이가 긴장하거나 불안할 때 나타날 수 있습니다.
-                pitch_mean : 714.71Hz -> 울음 전체가 높은 음역대로 유지되었다는 점에서, 고양이가 지속적으로 불안하거나 강한 관심을 요구하고 있을 가능성이 있습니다.
-                pitch_min : 714.71Hz -> 이는 고양이가 일반적인 대화 또는 관심을 끌고 싶을 때 많이 사용하는 음역대입니다.
-                sample_count가 97로 비교적 많은 샘플로 분석되었기 때문에 신뢰성이 있다고 볼 수도 있습니다.
-                    
-                이러한 요소들을 종합적으로 고려했을 때, 
-                해당 고양이의 울음은 약간의 불안 또는 긴장감과 함께 배고픔이나 애정 표현의 가능성도 있습니다.
-                보통, 고양이의 울음이 이렇게 여러 피치 범위를 가질 때, 고양이는 자신의 관심을 끌기 위해 의도적으로 다양한 음역대를 사용하기도 합니다.
-                
-                🐱💬 긴장했다옹, 배고프다옹, 관심달라옹
-            """.formatted(analysisJson);
-
+            String prompt = rawPrompt.formatted(analysisJson);
             String gptRequestBody = objectMapper.writeValueAsString(Map.of(
                     "model", "gpt-4o",
                     "messages", List.of(
