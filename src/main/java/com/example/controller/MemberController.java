@@ -2,7 +2,9 @@ package com.example.controller;
 
 
 import com.example.apiPayload.ApiResponse;
+import com.example.apiPayload.code.ErrorReasonDTO;
 import com.example.apiPayload.code.status.ErrorStatus;
+import com.example.apiPayload.exception.handler.MemberHandler;
 import com.example.converter.MemberConverter;
 import com.example.domain.entity.Member;
 import com.example.domain.enums.Role;
@@ -31,7 +33,7 @@ public class MemberController {
 
         if (memberService.checkEmailExists(request.getEmail())) {
             // 이메일이 존재하면 에러
-            return ApiResponse.onFailure(ErrorStatus.EMAIL_DUPLICATED);
+            throw new MemberHandler(ErrorStatus.EMAIL_DUPLICATED);
         }
         else {
             // 기본적으로 USER 역할
