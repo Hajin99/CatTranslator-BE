@@ -29,7 +29,9 @@ public class SecurityConfig {
                                 "/",
                                 "/users/login",
                                 "/users/join",
-                                "/css/**"
+                                "/css/**",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**"
                         ).permitAll()
                         .requestMatchers("/users/info", "/api/audio", "/api/audio/emotion").authenticated()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
