@@ -41,3 +41,6 @@ src/main/resources/application.yml
 
 # python 가상 환경 무시
 python/venv/
+
+# prompt 파일 무시
+src/main/resources/prompt.txt
