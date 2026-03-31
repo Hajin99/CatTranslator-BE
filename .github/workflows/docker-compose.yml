@@ -104,11 +104,10 @@ jobs:
         port: 22
         timeout: 60s
         script: |
-          sudo docker stop dnd2
-          sudo docker rm dnd2
-          sudo docker rmi rlaehddnd0422/dnd
-          sudo docker pull rlaehddnd0422/dnd
-          sudo docker run -d -p 8080:8080 --name dnd2 rlaehddnd0422/dnd
+          cd /home/ubuntu/app   # docker-compose.yml 위치
+          sudo docker-compose down
+          sudo docker-compose pull
+          sudo docker-compose up -d
 
     # REMOVE GitHub IP FROM security group (9)
     - name: Remove IP FROM security group
