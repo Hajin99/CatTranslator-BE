@@ -73,7 +73,7 @@ jobs:
      
     # Docker Hub push (4)
     - name: docker Hub push
-      run: docker push rlaehddnd0422/dnd
+      run: docker push hajin99/cattranslator
 
     # GET GitHub IP (5)
     - name: get GitHub IP
