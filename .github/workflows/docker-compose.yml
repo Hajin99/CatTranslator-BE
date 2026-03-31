@@ -104,9 +104,9 @@ jobs:
         timeout: 60s
         script: |
           cd /home/ubuntu/app   # docker-compose.yml 위치
-          sudo docker-compose down
-          sudo docker-compose pull
-          sudo docker-compose up -d
+          sudo docker compose down
+          sudo docker compose pull
+          sudo docker compose up -d
 
     # REMOVE GitHub IP FROM security group (9)
     - name: Remove IP FROM security group
