@@ -37,7 +37,7 @@ public class MemberController {
             // 기본적으로 USER 역할
             Role role = Role.USER;
 
-            // 특정 이메일 주소인 경우 ADMIN 역할 추가
+            // 특정 이메일 경우 ADMIN 역할 추가
             if ("hajin@hansung.ac.kr".equals(request.getEmail())) {
                 role = Role.ADMIN;
             }
@@ -57,7 +57,7 @@ public class MemberController {
 
     @GetMapping("/info")
     @Operation(summary= "마이페이지 API", description = "사용자 정보 API입니다.")
-    public ApiResponse<MemberResponseDTO.MemberInfoDTO> getMyInfo(HttpServletRequest request) {
-        return ApiResponse.onSuccess(memberService.getMemberInfo(request));
+    public ApiResponse<MemberResponseDTO.MemberInfoDTO> getMyInfo() {
+        return ApiResponse.onSuccess(memberService.getMemberInfo());
     }
 }

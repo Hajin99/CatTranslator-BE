@@ -9,7 +9,7 @@ import com.example.domain.entity.Member;
 import com.example.domain.enums.Role;
 import com.example.dto.MemberRequestDTO;
 import com.example.dto.MemberResponseDTO;
-import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -68,8 +68,9 @@ public class MemberServiceImpl implements MemberService{
 
     @Override
     @Transactional(readOnly = true)
-    public MemberResponseDTO.MemberInfoDTO getMemberInfo(HttpServletRequest request){
-        Authentication authentication = jwtTokenProvider.extractAuthentication(request);
+    public MemberResponseDTO.MemberInfoDTO getMemberInfo(){
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
         Member member = memberRepository.findByEmail(email)

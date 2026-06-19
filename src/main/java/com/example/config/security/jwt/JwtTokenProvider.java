@@ -24,6 +24,8 @@ public class JwtTokenProvider {
 
     private final JwtProperties jwtProperties;
 
+    // 서명 키 생성
+    // 바이트 배열로 변환해서 HS256 알고리즘용 Secret Key 생성
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(jwtProperties.getSecretKey().getBytes());
     }
@@ -40,24 +42,23 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public boolean validateToken(String token) {
-        try {
-            Jwts.parserBuilder()
-                    .setSigningKey(getSigningKey())
-                    .build()
-                    .parseClaimsJws(token);
-            return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;
-        }
-    }
-
-    public Authentication getAuthentication(String token) {
-        Claims claims = Jwts.parserBuilder()
+    private Claims parseClaims(String token) {
+        return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    public Authentication getAuthentication(String token) {
+
+        Claims claims;
+
+        try {
+            claims = parseClaims(token);
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new MemberHandler(ErrorStatus.INVALID_TOKEN);
+        }
 
         String email = claims.getSubject();
         String role = claims.get("role", String.class);
@@ -74,12 +75,5 @@ public class JwtTokenProvider {
         return null;
     }
 
-    public Authentication extractAuthentication(HttpServletRequest request){
-        String accessToken = resolveToken(request);
-        if(accessToken == null || !validateToken(accessToken)) {
-            throw new MemberHandler(ErrorStatus.INVALID_TOKEN);
-        }
-        return getAuthentication(accessToken);
-    }
 }
 
