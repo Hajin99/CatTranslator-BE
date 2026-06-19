@@ -16,5 +16,5 @@ public interface MemberService {
     boolean checkEmailExists(String email);
 
     // 마이페이지용 사용자 정보 조회
-    MemberResponseDTO.MemberInfoDTO getMemberInfo(HttpServletRequest request);
+    MemberResponseDTO.MemberInfoDTO getMemberInfo();
 }

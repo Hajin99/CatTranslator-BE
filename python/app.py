@@ -14,16 +14,16 @@ app = Flask(__name__)
 # 이미지 형태로 분석 결과 반환
 @app.route('/analyze', methods=['POST'])
 def analyze():
-    # 1. 파일 저장
-    data = request.get_data()
-    with open("temp.wav", "wb") as f:
-        f.write(data)
-    print("temp.wav 크기:", os.path.getsize("temp.wav"))
-
-    # 디버깅용
-    sf_data, sf_sr = sf.read("temp.wav")
-    print("sf_data:", sf_data.shape, sf_sr)
-    print("샘플 일부:", sf_data[:10])
+#     # 1. 파일 저장
+#     data = request.get_data()
+#     with open("temp.wav", "wb") as f:
+#         f.write(data)
+#     print("temp.wav 크기:", os.path.getsize("temp.wav"))
+#
+#     # 디버깅용
+#     sf_data, sf_sr = sf.read("temp.wav")
+#     print("sf_data:", sf_data.shape, sf_sr)
+#     print("샘플 일부:", sf_data[:10])
 
     # 2. 주파수 분석
     y, sr = librosa.load("temp.wav", sr=None)
@@ -41,11 +41,17 @@ def analyze():
     pitch_track = np.array(pitch_track)
 
     # 정규화: y축을 0 ~ 12 범위로 단순화
-    pitch_track = pitch_track / np.max(pitch_track) * 10  # 또는 12
+    # pitch_track = pitch_track / np.max(pitch_track) * 10  # 또는 12
+    # 정규화 제거, 실제 Hz로, 무음 제거
+    pitch_track = np.array(pitch_track)
+    pitch_track[pitch_track < 50] = np.nan  # 무음 제거
+    pitch_track[pitch_track > 1200] = np.nan  # 이상값 제거
+    valid = pitch_track[~np.isnan(pitch_track)]
     #ax.plot(np.max(pitches, axis=0))  # 프레임별 최대 피치 시각화
     # ax.plot(np.mean(pitches, axis=0))  # 간단히 평균 피치 시각화
-    ax.plot(pitch_track, color='black', linewidth=2)
-    ax.set_yticks(np.arange(0, 13, 2))
+    ax.plot(valid, color='black', linewidth=2)
+    ax.set_ylim(0, 1500)  # 고양이 울음 범위
+    ax.set_yticks(np.arange(0, 1600, 300))
     ax.set_xticks([])
     ax.grid(True, linestyle=':', linewidth=0.5)
     for side in ['top', 'right']:
@@ -59,6 +65,7 @@ def analyze():
     # 4. PNG 변환 후 응답
     img_io = io.BytesIO()
     plt.savefig(img_io, format='png')
+    plt.savefig("pitch_result.png")
     img_io.seek(0)
     plt.close(fig)
 
